@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #c54108;
+            margin: 0;
+            flex-direction: column;
+            overflow: hidden; /* Prevent scrollbars */
+            position: relative;
+        }
+
+        .background-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place it behind the game content */
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .game-board {
+            display: grid;
+            gap: 20px; /* Increase the gap for larger cards */
+        }
+
+        .card {
+            width: 150px; /* Increased width */
+            height: 150px; /* Increased height */
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+            border: 2px solid #000;
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 150px; /* Increase font size */
+            color: #ffffff; /* Set text color to white */
+        }
+
+        .card-front {
+            background-color: #4caf50;
+        }
+
+        .card-back {
+            background-color: #f0f0f0;
+            transform: rotateY(180deg);
+            color: #fffdfd; /* Set text color to black */
+        }
+
+        .card[data-name="⬆"] .card-front {
+            background-color: green;
+        }
+
+        .card[data-name="⬇"] .card-front {
+            background-color: #075a98;
+        }
+
+        .card[data-name="➡"] .card-front {
+            background-color: red;
+        }
+
+        .card[data-name="⬅"] .card-front {
+            background-color: #b10bb8;
+        }
+
+        #prompt, #level{
+            margin-top: 20px;
+            font-size: 100px; /* Updated font size */
+            color: #000000; /* Set text color to white */
+        }
+        #lives{
+            font-size: 40px;
+        }
+        .hidden {
+            display: none;
+        }
+
+        #message-box {
+            position: absolute;
+            top: 20px;
+            padding: 10px 20px;
+            background-color: white;
+            border: 2px solid #000;
+            border-radius: 5px;
+            font-size: 50px; /* Updated font size */
+            display: none;
+            color: #000000; /* Set text color to black */
+        }
+
+        /* Snow-like animated circles */
+        .snowflake {
+            fill: #ffffff;
+            opacity: 0.7;
+            animation: snow 10s linear infinite;
+        }
+
+        @keyframes snow {
+            0% {
+                transform: translateY(-10%);
+            }
+            100% {
+                transform: translateY(110%);
+            }
+        }
+    </style>
+    <style>
+        html {
+            height:100%;
+        }
+
+        body {
+            margin:0;
+        }
+
+        .bg {
+            animation:slide 3s ease-in-out infinite alternate;
+            background-image: linear-gradient(-60deg, #6c3 50%, #09f 50%);
+            bottom:0;
+            left:-50%;
+            opacity:.5;
+            position:fixed;
+            right:-50%;
+            top:0;
+            z-index:-1;
+        }
+
+        .bg2 {
+            animation-direction:alternate-reverse;
+            animation-duration:4s;
+        }
+
+        .bg3 {
+            animation-duration:5s;
+        }
+
+        @keyframes slide {
+            0% {
+                transform:translateX(-25%);
+            }
+            100% {
+                transform:translateX(25%);
+            }
+        }
+        .sound-toggle {
+            position: absolute;
+            left: 90%;
+            top: 85%;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 20px;
+            cursor: pointer;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .sound-toggle.active {
+            background-color: #4caf50;
+        }
+        #lives{
+            position: absolute;
+            top: 5%;
+            left: 75%;
+        }
+
+    </style>
+</head>
+<body>
+<button id="sound-toggle" class="sound-toggle">Sound ON</button>
+<audio id="background-sound" src="lets-dance-126506.mp3" loop></audio>
+<audio id="correct-sound">
+    <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-win.mp3">
+</audio>
+<audio id="incorrect-sound">
+    <source src="http://c2064.in-berlin.de/fcc/wrong.mp3" type="audio/mpeg">
+</audio>
+</audio>
+
+<!-- -->
+
+<svg class="background-svg" viewBox="0 0 100 100">
+    <!-- Multiple small circles for snow effect
+    <circle cx="10" cy="10" r="1.5" class="snowflake" />
+    <circle cx="30" cy="20" r="2" class="snowflake" />
+    <circle cx="50" cy="30" r="1.8" class="snowflake" />
+    <circle cx="70" cy="40" r="2.5" class="snowflake" />
+    <circle cx="90" cy="50" r="1.7" class="snowflake" />
+    <circle cx="20" cy="70" r="2" class="snowflake" />
+    <circle cx="40" cy="80" r="1.5" class="snowflake" />
+    <circle cx="60" cy="90" r="2.2" class="snowflake" />
+    <circle cx="80" cy="10" r="1.8" class="snowflake" />
+    <circle cx="25" cy="25" r="2" class="snowflake" />
+    -->
+    <!-- Add more circles as needed -->
+</svg>
+
+<img id="correct-img" src="output-onlinegiftools(2).gif" class="hidden" alt="Correct" width="100" height="100">
+<img id="incorrect-img" src="output-onlinegiftools(3).gif" class="hidden" alt="Incorrect" width="100" height="100">
+<div id="game-container">
+    <div class="game-board" id="game-board">
+        <!-- Cards will be dynamically added here -->
+    </div>
+    <div id="prompt" class="hidden"></div>
+    <div id="level" class="hidden"></div>
+    <div id="lives" class="hidden">❤</div>
+    <div id="score" class="hidden"></div> <!-- Added score container -->
+</div>
+<div id="message-box"></div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const gameBoard = document.getElementById('game-board');
+        const prompt = document.getElementById('prompt');
+        const levelDisplay = document.getElementById('level');
+        const livesDisplay = document.getElementById('lives');
+        const messageBox = document.getElementById('message-box');
+        const correctImg = document.getElementById('correct-img');
+        const incorrectImg = document.getElementById('incorrect-img');
+        const backgroundSound = document.getElementById('background-sound');
+        const correctSound = document.getElementById('correct-sound');
+        const incorrectSound = document.getElementById('incorrect-sound');
+        const soundToggle = document.getElementById('sound-toggle');
+
+        const levels = [
+            [
+                { emoji: '⬆', name: '⬆', count: 1 },  // Level 1: Select 1 ⬆
+                { emoji: '⬇', name: '⬇', count: 1 },  // Level 1: Select 1 ⬇
+            ],
+            [
+                { emoji: '➡', name: '➡', count: 2 },  // Level 2: Select 2 ➡
+                { emoji: '⬅', name: '⬅', count: 2 },  // Level 2: Select 2 ⬅
+            ],
+            [
+                { emoji: '⬆', name: '⬆', count: 3 },  // Level 3: Select 3 ⬆
+                { emoji: '⬅', name: '⬅', count: 3 },  // Level 3: Select 3 ⬅
+                { emoji: '⬇', name: '⬇', count: 3 },  // Level 3: Select 3 ⬇
+            ],
+            [
+                { emoji: '⬅', name: '⬅', count: 4 },  // Level 4: Select 4 ⬅
+                { emoji: '⬇', name: '⬇', count: 4 },  // Level 4: Select 4 ⬇
+                { emoji: '⬆', name: '⬆', count: 4 },  // Level 4: Select 4 ⬆
+            ],
+            [
+                { emoji: '⬇', name: '⬇', count: 5 },  // Level 5: Select 5 ⬇
+                { emoji: '⬅', name: '⬅', count: 5 },  // Level 5: Select 5 ⬅
+                { emoji: '➡', name: '➡', count: 5 },  // Level 5: Select 5 ➡
+            ]
+        ];
+        let currentLevel = 0;
+        let levelPlayCount = 0;
+        let lives = 3;
+        let isSoundOn = true;
+
+        function showMessage(text) {
+            messageBox.textContent = text;
+            messageBox.style.display = 'block';
+        }
+
+        function hideMessage() {
+            messageBox.style.display = 'none';
+        }
+
+        function updateLives() {
+            const livesDisplay = document.getElementById('lives');
+            livesDisplay.innerHTML = 'Lives: ' + '❤'.repeat(lives);
+        }
+
+
+        function startGame() {
+            if (currentLevel >= levels.length) {
+                showMessage('You have completed all levels!');
+                return;
+            }
+
+            if (levelPlayCount >= 3) {
+                currentLevel++;
+                levelPlayCount = 0;
+                lives = 3;
+            }
+
+            const images = levels[currentLevel];
+            gameBoard.innerHTML = '';
+
+            // Update level and lives display
+            levelDisplay.textContent = `Level ${currentLevel + 1} - Attempt ${levelPlayCount + 1}`;
+            levelDisplay.style.position = 'absolute';
+            levelDisplay.style.top = '3%'
+            levelDisplay.style.left = '2%'
+            levelDisplay.style.fontSize = '30px'
+            levelDisplay.classList.remove('hidden');
+            livesDisplay.classList.remove('hidden');
+            updateLives();
+
+            // Shuffle images
+            images.sort(() => 0.5 - Math.random());
+
+            // Calculate total number of cards needed
+            let totalCards = images.reduce((total, image) => total + image.count, 0);
+
+            // Adjust game board grid based on number of cards
+            const gridSize = Math.ceil(Math.sqrt(totalCards));
+            gameBoard.style.gridTemplateColumns = `repeat(${gridSize}, 150px)`; /* Updated card size */
+
+            // Randomly shuffle positions
+            let positions = [];
+            for (let i = 0; i < totalCards; i++) {
+                positions.push(i);
+            }
+            positions.sort(() => 0.5 - Math.random());
+
+            // Create cards based on count
+            let positionIndex = 0;
+            images.forEach(image => {
+                for (let i = 0; i < image.count; i++) {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+                    card.dataset.name = image.name;
+
+                    const cardInner = document.createElement('div');
+                    cardInner.classList.add('card-inner');
+
+                    const cardFront = document.createElement('div');
+                    cardFront.classList.add('card-front');
+                    cardFront.textContent = image.emoji;
+
+                    const cardBack = document.createElement('div');
+                    cardBack.classList.add('card-back');
+
+                    cardInner.appendChild(cardFront);
+                    cardInner.appendChild(cardBack);
+                    card.appendChild(cardInner);
+
+                    // Randomly position the card
+                    const position = positions[positionIndex];
+                    const row = Math.floor(position / gridSize) + 1;
+                    const col = position % gridSize + 1;
+                    card.style.gridRow = row;
+                    card.style.gridColumn = col;
+
+                    gameBoard.appendChild(card);
+                    positionIndex++;
+                }
+            });
+
+            let selectedImage;
+            let correctCount = 0;
+
+            // Display prompt and images for 5 seconds
+            prompt.classList.remove('hidden');
+
+            // Select a random image to prompt
+            selectedImage = images[0].name; // Assume all have the same name in one level
+            prompt.textContent = `Select ${images[0].count} ${selectedImage}`;
+
+            setTimeout(() => {
+                document.querySelectorAll('.card').forEach(card => {
+                    card.classList.add('flipped');
+                });
+
+                // Hide the prompt after 3 seconds
+                setTimeout(() => {
+                    prompt.classList.add('hidden');
+                }, 400);
+
+                // Add event listeners to cards
+                document.querySelectorAll('.card').forEach(card => {
+                    card.addEventListener('click', handleCardClick);
+                });
+            }, 5000);
+
+            function handleCardClick() {
+                const clickedCard = this;
+
+                // Prevent clicking on already matched cards
+                if (clickedCard.classList.contains('matched')) {
+                    return;
+                }
+
+                clickedCard.classList.remove('flipped');
+
+                const cardName = clickedCard.dataset.name;
+                if (cardName === selectedImage) {
+                    correctCount++;
+                    correctSound.play(); // Play correct sound
+                    if (correctCount === images[0].count) {
+                        correctImg.classList.remove('hidden');
+                        setTimeout(() => {
+                            correctImg.classList.add('hidden');
+                            levelPlayCount++;
+                            if (levelPlayCount >= 3) {
+                                currentLevel++;
+                                levelPlayCount = 0;
+                                lives = 3; // Reset lives for next level
+                            }
+                            startGame(); // Start next attempt or level
+                        }, 1000);
+                    } else {
+                        showMessage(`${images[0].count - correctCount} more ${selectedImage} to go!`);
+                        setTimeout(hideMessage, 2000);
+                    }
+                } else {
+                    showMessage('Try Again!');
+                    incorrectSound.play(); // Play incorrect sound
+                    incorrectImg.classList.remove('hidden');
+                    lives--;
+                    updateLives();
+                    if (lives === 0) {
+                        setTimeout(() => {
+                            currentLevel = Math.max(currentLevel - 1, 0); // Go back one level, but not below level 0
+                            levelPlayCount = 0;
+                            lives = 3; // Reset lives for previous level
+                            incorrectImg.classList.add('hidden');
+                            hideMessage();
+                            startGame();
+                        }, 1000);
+                    } else {
+                        setTimeout(() => {
+                            incorrectImg.classList.add('hidden');
+                            hideMessage();
+                            clickedCard.classList.add('flipped'); // Flip back after 0.7s
+                        }, 700); // Adjusted to 700 milliseconds
+                    }
+                }
+            }
+        }
+
+        function toggleSound() {
+            if (isSoundOn) {
+                backgroundSound.pause();
+                soundToggle.textContent = 'Sound OFF';
+                soundToggle.classList.remove('active');
+            } else {
+                backgroundSound.play();
+                soundToggle.textContent = 'Sound ON';
+                soundToggle.classList.add('active');
+            }
+            isSoundOn = !isSoundOn;
+        }
+
+        // Play background sound when the page loads
+        backgroundSound.play();
+        backgroundSound.volume = 0.3; // Adjust volume as needed
+
+        // Add event listener for sound toggle button
+        soundToggle.addEventListener('click', toggleSound);
+
+        startGame();
+    });
+</script>
+</body>
+</html>

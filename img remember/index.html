@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #c54108;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .game-board {
+            display: grid;
+            gap: 10px;
+        }
+
+        .card {
+            width: 150px;
+            height: 150px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+            border: 2px solid #000;
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 100px;
+        }
+
+        .card-front {
+            background-color: #4caf50;
+        }
+
+        .card-back {
+            background-color: #f0f0f0;
+            transform: rotateY(180deg);
+        }
+
+        #player-card {
+            background: #fff;
+            border: 2px solid #000;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        #lives {
+            font-size: 25px;
+            margin-bottom: 10px;
+        }
+
+        #timer {
+            font-size: 24px;
+        }
+
+        #prompt, #message {
+            margin-top: 20px;
+            font-size: 100px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<img id="correct-img" src="output-onlinegiftools(2).gif" class="hidden" alt="Correct" width="200" height="200" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);z-index: 1000">
+<img id="incorrect-img" src="output-onlinegiftools(3).gif" class="hidden" alt="Incorrect" width="200" height="200" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);z-index: 1000">
+<audio id="correct-sound">
+    <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-win.mp3">
+</audio>
+
+<audio id="incorrect-sound">
+    <source src="http://c2064.in-berlin.de/fcc/wrong.mp3" type="audio/mpeg">
+</audio>
+
+<div id="game-container">
+    <div id="player-card" style="position: absolute;left: 3%;top: 4%;">
+        <div id="lives" style="font-size: 20px">Lives: ❤❤❤</div>
+        <div id="timer" class="hidden" style="font-size: 50px">Time: 3</div>
+    </div>
+    <div class="game-board" id="game-board">
+        <!-- Cards will be dynamically added here -->
+    </div>
+    <div id="prompt" class="hidden"></div>
+    <div id="message" class="hidden"></div>
+    <div id="level" class="hidden" style="font-size: 50px"></div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const gameBoard = document.getElementById('game-board');
+        const prompt = document.getElementById('prompt');
+        const message = document.getElementById('message');
+        const levelDisplay = document.getElementById('level');
+        const livesDisplay = document.getElementById('lives');
+        const timerDisplay = document.getElementById('timer');
+        const correctImg = document.getElementById('correct-img');
+        const incorrectImg = document.getElementById('incorrect-img');
+        const correctSound = document.getElementById('correct-sound');
+        const incorrectSound = document.getElementById('incorrect-sound');
+
+        const levels = [
+            [
+                { emoji: '🐄', name: '🐄' },
+                { emoji: '🌳', name: '🌳' },
+                { emoji: '🐱', name: '🐱' },
+                { emoji: '😄', name: '😄' }
+            ],
+            [
+                { emoji: '🐄', name: '🐄' },
+                { emoji: '🌳', name: '🌳' },
+                { emoji: '🐱', name: '🐱' },
+                { emoji: '🐶', name: '🐶' },
+                { emoji: '🦊', name: '🦊' },
+                { emoji: '😂', name: '😂' }
+            ],
+            [
+                { emoji: '🐄', name: '🐄' },
+                { emoji: '🌳', name: '🌳' },
+                { emoji: '🐱', name: '🐱' },
+                { emoji: '🐶', name: '🐶' },
+                { emoji: '🦊', name: '🦊' },
+                { emoji: '🦁', name: '🦁' },
+                { emoji: '🐮', name: '🐮' },
+                { emoji: '👀', name: '👀' },
+                { emoji: '😎', name: '😎' }
+            ],
+            [
+                { emoji: '🐄', name: '🐄' },
+                { emoji: '🌳', name: '🌳' },
+                { emoji: '🐱', name: '🐱' },
+                { emoji: '🐶', name: '🐶' },
+                { emoji: '🦊', name: '🦊' },
+                { emoji: '🦁', name: '🦁' },
+                { emoji: '🐮', name: '🐮' },
+                { emoji: '👀', name: '👀' },
+                { emoji: '😎', name: '😎' },
+                { emoji: '🌺', name: '🌺' },
+                { emoji: '🚗', name: '🚗' },
+                { emoji: '🐸', name: '🐸' }
+            ],
+            [
+                { emoji: '🐄', name: '🐄' },
+                { emoji: '🌳', name: '🌳' },
+                { emoji: '🐱', name: '🐱' },
+                { emoji: '🐶', name: '🐶' },
+                { emoji: '🦊', name: '🦊' },
+                { emoji: '👀', name: '👀' },
+                { emoji: '😎', name: '😎' },
+                { emoji: '🌺', name: '🌺' },
+                { emoji: '🚗', name: '🚗' },
+                { emoji: '⚽️', name: '⚽️' },
+                { emoji: '🏀', name: '🏀' },
+                { emoji: '🎸', name: '🎸' }
+            ],
+            [
+                { emoji: '🦊', name: '🦊' },
+                { emoji: '🦁', name: '🦁' },
+                { emoji: '🐮', name: '🐮' },
+                { emoji: '👀', name: '👀' },
+                { emoji: '😎', name: '😎' },
+                { emoji: '🌺', name: '🌺' },
+                { emoji: '🚗', name: '🚗' },
+                { emoji: '⚽️', name: '⚽️' },
+                { emoji: '🏀', name: '🏀' },
+                { emoji: '🎸', name: '🎸' },
+                { emoji: '🦓', name: '🦓' },
+                { emoji: '🦒', name: '🦒' }
+            ]
+        ];
+
+        let currentLevel = 0;
+        let lives = 3;
+
+        function startGame() {
+            if (currentLevel >= levels.length) {
+                message.textContent = 'You have completed all levels!';
+                message.classList.remove('hidden');
+                return;
+            }
+
+            const images = levels[currentLevel];
+            gameBoard.innerHTML = '';
+
+            // Update level display
+            levelDisplay.textContent = `Level ${currentLevel + 1}`;
+            levelDisplay.classList.remove('hidden');
+
+            // Update lives display
+            updateLivesDisplay();
+            livesDisplay.classList.remove('hidden');
+
+            // Shuffle images
+            images.sort(() => 0.5 - Math.random());
+
+            // Adjust game board grid based on number of cards
+            const gridSize = Math.ceil(Math.sqrt(images.length));
+            gameBoard.style.gridTemplateColumns = `repeat(${gridSize}, 150px)`; /* Adjusted for larger cards */
+
+            // Create cards
+            images.forEach(image => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.name = image.name;
+
+                const cardInner = document.createElement('div');
+                cardInner.classList.add('card-inner');
+
+                const cardFront = document.createElement('div');
+                cardFront.classList.add('card-front');
+                cardFront.textContent = image.emoji;
+
+                const cardBack = document.createElement('div');
+                cardBack.classList.add('card-back');
+
+                cardInner.appendChild(cardFront);
+                cardInner.appendChild(cardBack);
+                card.appendChild(cardInner);
+
+                gameBoard.appendChild(card);
+            });
+
+            let selectedImage;
+            let clickEnabled = false; // Add flag to control click events
+
+            // Display prompt and images for 5 seconds
+            prompt.classList.remove('hidden');
+
+            // Select a random image to prompt
+            selectedImage = images[Math.floor(Math.random() * images.length)].name;
+            prompt.textContent = `Select the ${selectedImage}`;
+
+            setTimeout(() => {
+                document.querySelectorAll('.card').forEach(card => {
+                    card.classList.add('flipped');
+                });
+
+                // Hide the prompt after 3 seconds
+                setTimeout(() => {
+                    prompt.classList.add('hidden');
+                }, 400);
+
+                // Show and start timer
+                timerDisplay.classList.remove('hidden');
+                let remainingTime = 3; // Fixed 3 seconds
+                timerDisplay.textContent = `Time: ${remainingTime}`;
+                const timerInterval = setInterval(() => {
+                    remainingTime--;
+                    timerDisplay.textContent = `Time: ${remainingTime}`;
+                    if (remainingTime <= 0) {
+                        clearInterval(timerInterval);
+                        timerDisplay.classList.add('hidden');
+                        clickEnabled = true;
+                    }
+                }, 1000);
+
+                // Add event listeners to cards
+                document.querySelectorAll('.card').forEach(card => {
+                    card.addEventListener('click', handleCardClick);
+                });
+            }, 5000);
+
+            function handleCardClick() {
+                if (!clickEnabled) return; // Ignore clicks if not enabled
+
+                this.classList.remove('flipped');
+
+                const cardName = this.dataset.name;
+                if (cardName === selectedImage) {
+                    message.textContent = 'Correct!';
+                    correctImg.classList.remove('hidden');
+                    correctSound.play();  // Play correct sound
+                    currentLevel++;
+                    lives = 3;  // Reset lives for the next level
+                } else {
+                    message.textContent = 'Try Again!';
+                    incorrectImg.classList.remove('hidden');
+                    incorrectSound.play();  // Play incorrect sound
+                    lives--;
+                    if (lives === 0) {
+                        currentLevel = Math.max(0, currentLevel - 1);  // Go back one level
+                        lives = 3;  // Reset lives
+                    }
+                }
+                updateLivesDisplay(); // Update lives display
+                message.classList.remove('hidden');
+
+                // Remove event listeners after selection
+                document.querySelectorAll('.card').forEach(card => {
+                    card.removeEventListener('click', handleCardClick);
+                });
+
+                // Hide images after 2 seconds and reset the game
+                setTimeout(() => {
+                    correctImg.classList.add('hidden');
+                    incorrectImg.classList.add('hidden');
+                    resetGame();
+                }, 2000);
+            }
+
+            function updateLivesDisplay() {
+                livesDisplay.innerHTML = `Lives: ${'❤'.repeat(lives)}`;
+            }
+
+            function resetGame() {
+                document.querySelectorAll('.card').forEach(card => {
+                    card.classList.add('flipped');
+                });
+                prompt.classList.add('hidden');
+                message.classList.add('hidden');
+                startGame();
+            }
+        }
+
+        startGame();
+    });
+
+</script>
+
+
+</body>
+</html>

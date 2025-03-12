@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video with Start Button</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #c54108;
+        }
+
+        #videoContainer {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #startButton {
+            display: none; /* Hide button initially */
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            position: absolute;
+            z-index: 10;
+            text-decoration: none;
+            text-align: center;
+            top: 50%; /* Center vertically */
+            left: 50%; /* Center horizontally */
+            transform: translate(-50%, -50%); /* Adjust for the button size */
+        }
+
+        #startButton a {
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="videoContainer">
+    <iframe id="videoElement" width="100%" height="100%" src="https://www.youtube.com/embed/NcQBKv2rs_s?enablejsapi=1" frameborder="0" allowfullscreen></iframe>
+    <button id="startButton"><a href="main.html">Start</a></button>
+</div>
+
+<script>
+    const startButton = document.getElementById('startButton');
+    let player;
+
+    // YouTube Player API
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('videoElement', {
+            events: {
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.ENDED) {
+            document.getElementById('videoElement').style.display = 'none';  // Hide the video
+            startButton.style.display = 'block';  // Show the button when video ends
+        }
+    }
+
+    // Load YouTube API
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+</script>
+
+</body>
+</html>

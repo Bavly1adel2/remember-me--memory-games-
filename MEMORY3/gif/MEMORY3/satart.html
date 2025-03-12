@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Screen Video</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #video-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+        }
+
+        #video-link {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+<div id="video-container">
+    <video controls id="main-video" src="WhatsApp Video 2024-06-22 at 00.41.49_ec550dd2.mp4" autoplay muted>
+        Your browser does not support the video tag.
+    </video>
+    <a id="video-link" href="index.html">start game</a>
+</div>
+
+<script>
+    const video = document.getElementById('main-video');
+    const videoLink = document.getElementById('video-link');
+
+    video.addEventListener('ended', function() {
+        video.style.display = 'none';
+        videoLink.style.display = 'block';
+    });
+</script>
+</body>
+</html>

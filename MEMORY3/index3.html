@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+
+        body {
+            align-items: center;
+            background: linear-gradient(270deg, #2fd634, #2f85d6, #d67a2f);
+            background-size: 600% 600%;
+
+            -webkit-animation: AnimationName 30s ease infinite;
+            -moz-animation: AnimationName 30s ease infinite;
+            animation: AnimationName 30s ease infinite;
+            display: flex;
+            height: 80vh;
+            justify-content: center;
+            overflow: hidden;
+            perspective: 1200px;
+        }
+
+        .board {
+            display: grid;
+            gap: 10px;
+            grid-gap: 20px;
+            grid-template-columns: repeat(4, 250px); /* Increased tile width */
+            grid-template-rows: repeat(4, 200px); /* Increased tile height */
+            position: relative;
+            top: 20px;
+            transform-style: preserve-3d;
+            transform: rotateX(50deg) rotateZ(0deg);
+            user-select: none;
+        }
+
+        .clone {
+            display: none;
+        }
+
+        .cube {
+            animation: enter 600ms ease-out;
+            transform-style: preserve-3d;
+            transform: translateZ(0) scale(1);
+            transition: all 350ms ease-out;
+            transform-origin: 50% 50%;
+            backface-visibility: hidden;
+        }
+
+        .cube.flipped {
+            pointer-events: none;
+            transform: rotateY(180deg) translateZ(0) scale(1);
+            transition: all 500ms ease-out;
+        }
+
+        .cube.matched {
+            pointer-events: none;
+            transform: rotateY(180deg) translateZ(0) scale(1);
+            animation: match 650ms ease-out;
+        }
+
+
+        .face {
+            outline: 1px solid transparent;
+            backface-visibility: hidden;
+            box-shadow: inset 0 0 2px 1px #fff0d2;
+            height: 200px; /* Increased tile height */
+            overflow: hidden;
+            position: absolute;
+            transform-origin: 50% 50%;
+            width: 200px; /* Increased tile width */
+        }
+
+        .face:nth-child(1) {
+            background-color: wheat;
+            cursor: pointer;
+            transform: rotateY(0deg) translateZ(10px);
+            transition: background 150ms ease-out;
+        }
+
+        .face:nth-child(1):before {
+            align-items: center;
+            bottom: 0;
+            color: #93794c;
+            content: '?';
+            display: flex;
+            font-family: 'Fredoka One', cursive;
+            font-size: 80px;
+            justify-content: center;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+
+        .face:nth-child(2) {
+            background-color: #16d9e3;
+            width: 20px;
+            transform: rotateY(90deg) translateZ(65px)
+        }
+        .face:nth-child(3) {
+            background-color: dodgerblue;
+            transform: rotateY(180deg) translateZ(10px)
+        }
+        .face:nth-child(4) {
+            background-color:  #16d9e3;
+            width: 20px;
+            transform: rotateY(270deg) translateZ(10px)
+        }
+        .face:nth-child(5) {
+            background-color: #16d9e3;
+            height: 20px;
+            transform: rotateX(90deg) translateZ(10px)
+        }
+        .face:nth-child(6) {
+            background-color:  #16d9e3;
+            height: 20px;
+            transform: rotateX(-90deg) translateZ(130px)
+        }
+
+        .overlay {
+            align-items: center;
+            background: rgba(255,255,255,0.75);
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            left: 0;
+            opacity: 1;
+            position: absolute;
+            height: 90vh;
+            top: 0;
+            transition: all 500ms ease-out;
+            z-index: 100;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: all 300ms ease-out;
+        }
+
+        .overlay.hidden .gameover {
+            transform: translateY(60px);
+            transition: all 300ms ease-out;
+        }
+
+        .gameover {
+            align-items: center;
+            background-color: #fff;
+            border-radius: 120px;
+            border: 12px solid #50b8f7;
+            color: #2e2e2e;
+            display: flex;
+            font-family: 'Fredoka One', cursive;
+            font-size: 40px;
+            height: 120px;
+            width: 340px;
+            justify-content: space-between;
+            padding: 0 10px 0 30px;
+            transform: translateY(0);
+            transition: all 500ms ease-out;
+            user-select: none;
+        }
+
+        .reset {
+            background-color: #fbc300;
+            border-radius: 50%;
+            border: 0;
+            box-shadow: 0px 6px 0px 0px #f2a003;
+            cursor: pointer;
+            display: block;
+            height: 94px;
+            margin-left: 20px;
+            position: relative;
+            top: -3px;
+            width: 96px;
+        }
+
+        .reset:active {
+            box-shadow: none;
+            top: 0;
+        }
+
+        .reset:focus {
+            outline: 0;
+        }
+
+
+        [data-tile="ز"] div:nth-child(3) {
+            /*
+            content: "";
+            display: block;
+            text-align: center;
+            font-size: 200px;
+
+            */
+            background: #fff8e7 url(letter/ز.png) center center no-repeat;
+
+
+
+            background-size: 100px;
+        }
+
+        [data-tile="1"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/1.png) bottom center no-repeat;
+            background-size: 500px;
+
+            background-color: #504e4e;
+        }
+
+        [data-tile="2"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/2.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+
+        [data-tile="3"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/3.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="4"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/4.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="5"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/5.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+
+        [data-tile="6"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/6.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="66"] div:nth-child(3) {
+              background: #fff8e7 url(numbers/Numbers/66.png) center center no-repeat;
+              background-size: 100px;
+
+            background-color: #504e4e;
+          }
+        [data-tile="12"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/12.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="18"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/18.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="14"] div:nth-child(3) {
+              background: #fff8e7 url(numbers/Numbers/14.png) center center no-repeat;
+              background-size: 100px;
+
+            background-color: #504e4e;
+          }
+        [data-tile="41"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/41.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="15"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/15.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="51"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/51.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="9"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/9.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="19"] div:nth-child(3) {
+              background: #fff8e7 url(numbers/Numbers/19.png) center center no-repeat;
+              background-size: 100px;
+
+            background-color: #504e4e;
+          }
+        [data-tile="91"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/91.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="17"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/17.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+
+        [data-tile="18"] div:nth-child(3) {
+            background: #fff8e7 url(Numbers/Numbers/18.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="77"] div:nth-child(3) {
+            background: #fff8e7 url(Numbers/Numbers/77.png) center center no-repeat;
+            background-size:100px;
+            background-color: #504e4e;
+        }
+        [data-tile="88"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/88.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="71"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/71.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="7"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/7.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="8"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/8.png) center center no-repeat;
+            background-size: 100px;
+            background-color: #504e4e;
+        }
+        [data-tile="9"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/9.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        [data-tile="21"] div:nth-child(3) {
+            background: #fff8e7 url(numbers/Numbers/21.png) center center no-repeat;
+            background-size: 100px;
+
+            background-color: #504e4e;
+        }
+        audio {
+            display: none;
+        }
+
+        @keyframes enter {
+            0% {
+                transform: translateZ(-20px) scale(0.3);
+            }
+            50% {
+                transform: translateZ(20px) scale(1.02);
+            }
+            100% {
+                transform: translateZ(0) scale(1);
+            }
+        }
+
+        @keyframes match {
+            0% {
+                transform: rotateY(180deg) translateZ(-15px);
+            }
+            50% {
+                transform: rotateY(180deg) translateZ(10px);
+            }
+            100% {
+                transform: rotateY(180deg) translateZ(0);
+            }
+        }
+        @-webkit-keyframes AnimationName {
+            0%{background-position:0% 50%}
+            50%{background-position:100% 50%}
+            100%{background-position:0% 50%}
+        }
+        @-moz-keyframes AnimationName {
+            0%{background-position:0% 50%}
+            50%{background-position:100% 50%}
+            100%{background-position:0% 50%}
+        }
+        @keyframes AnimationName {
+            0%{background-position:0% 50%}
+            50%{background-position:100% 50%}
+            100%{background-position:0% 50%}
+        }
+        *, *:after, *:before{
+            box-sizing: border-box;
+        }
+        body{
+            margin: 0;
+            font-family: "Open Sans",sans-serif;
+        }
+        .loader-wrap{
+            background: #333 url("data:image/gif;base64,R0lGODlhQABAAJEAABoaGhMTEyoqKh8fHyH5BAAAAAAALAAAAABAAEAAAAL/VBCGmtfrmIwU2ofZQGAf33HgKJafGZ5qyl6TW2XxK8PQSuJozvL+DqAJZ0Rb7agB6pY9ZZMJMg6lRWTVAHX+stzm1EoNgzHbp7mMdoq/7Ku7m4Zrge21236Jn+dyJn5cB0jRt0eotxGYeCeIcMhXCMnzpzhJZPjomEXJyPmVGYn5WDnaOQh6ieq1uMka8/kaukLaWpkKe0lbSnp72iupC9xqG+tbknu8yKssGrzqDDMcDYo8m0y8TFitLSiNvUfdLOY9jrINPtR9HXr+zEmeLhsu3wZfLMdu7qpeX5bvL8Nv37d2+Ma8swfpX0EsCA/+WEiwikOBvyDmCxjQ4jwHCxPrKYxIBWNDIAUAADs=");
+            height: 100%;
+            width: 100%;
+            position: fixed;
+            z-index: 99999;
+        }
+        .loader{
+            font-size: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            width: 120px;
+            height: 20px;
+        }
+        .loader:after{
+            color: rgba(0,183,229,0.9);
+            content: "Loading...";
+            font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            position: absolute;
+            width: 120px;
+            top: 40px;
+            left: 5px;
+            text-align: center;
+        }
+        [class*='box-']{
+            display: inline-block;
+            font-size: 15px;
+            line-height: 20px;
+            margin-right: 5px;
+            height: 20px;
+            width: 20px;
+            border: 5px solid rgba(0,183,229,0.9);
+            border-right: 5px solid transparent;
+            border-left: 5px solid transparent;
+            box-shadow: 0 0 10px #2187e7;
+            border-radius: 50%;
+            transform: scale(0.7);
+            animation: loader 1s infinite linear;
+        }
+        [class*='box-']:last-child{
+            margin-right: 0;
+        }
+        .box-1{
+            animation-delay: .4s;
+        }
+        .box-2{
+            animation-delay: .3s;
+        }
+        .box-3{
+            animation-delay: .2s;
+        }
+        .box-4{
+            animation-delay: .3s;
+        }
+        .box-5{
+            animation-delay: .4s;
+        }
+        @keyframes loader{
+            0% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.7) rotate(10deg);
+                opacity: 0.1;
+            }
+        }
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            z-index: 10;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .hidden {
+            opacity: 0;
+        }
+
+        .wow {
+            color: green;
+
+        }
+
+        .no {
+            color: red;
+        }
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="timer"></div>
+
+<div class="overlay hidden">
+    <div class="win-message hidden"><img src="gif/final.gif"></div>
+</div>
+
+<div class='board'></div>
+<div class='clone'>
+    <div class='face'></div>
+    <div class='face'></div>
+    <div class='face'></div>
+    <div class='face'></div>
+    <div class='face'></div>
+    <div class='face'></div>
+</div>
+<div class='overlay hidden'>
+    <div class='gameover'>
+        <p>YOU WON!</p>
+        <button class='reset'>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="M485.8 113.9L349.3 250.5c-3.5 3.5-3.5 9.1 0 12.6l136.6 136.6c5.6 5.6 15.2 1.6 15.2-6.3V120.2c-.1-7.9-9.7-11.9-15.3-6.3z" fill="#fff"/><path d="M500 194.8V317c125.9 0 228 102.1 228 228S625.9 773 500 773v121.8c193.3 0 350-156.7 350-350s-156.7-350-350-350zM272 545c0-55.1 19.6-105.7 52.1-145.1 6.5-7.9 5.9-19.5-1.4-26.8l-58.3-58.3c-8.2-8.2-21.7-7.7-29.3 1-53 61.5-85.1 141.5-85.1 229 0 193.3 156.7 350 350 350V773c-125.9 0-228-102.1-228-228z" fill="#fff"/></svg>
+        </button>
+    </div>
+</div>
+<div class="message wow hidden"><img src="gif/output-onlinegiftools(2).gif"></div>
+<div class="message no hidden"><img src="gif/output-onlinegiftools(3).gif"></div>
+
+<!-- Preload Game Sounds -->
+<audio preload="auto" class="audio-win" >
+    <source src="sounds/brass-new-level-151765.mp3">
+</audio>
+<audio preload="auto" class="audio-ahahah" >
+
+    <source src="sounds/cat-meow-85175.mp3">
+
+</audio>
+<audio preload="auto" class="audio-dino" >
+    <source src="sounds/frog-croak-80816.mp3">
+</audio>
+<audio preload="auto" class="audio-egg" >
+    <source src="sounds/duck-quack-112941(1).mp3">
+</audio>
+<audio preload="auto" class="audio-erupt" >
+    <source src="sounds/goat-sound-177346.mp3">
+</audio>
+<audio preload="auto" class="audio-ptero" >
+    <source src="sounds/dog-bark-179915.mp3">
+</audio>
+<audio preload="auto" class="audio-tri" >
+    <source src="sounds/donkey-bray-36757.mp3">
+</audio>
+<audio preload="auto" class="audio-tri" >
+    <source src="sounds/donkey-bray-36757.mp3">
+</audio>
+<audio preload="auto" class="audio-cat" >
+    <source src="sounds/bird-3-f-89236(1)(1).mp3">
+
+</audio>
+<audio preload="auto" class="audio-dog" >
+    <source src="sounds/elephant-trumpets-growls-6047.mp3">
+
+</audio>
+<audio class="audio-no">
+    <source src="http://c2064.in-berlin.de/fcc/wrong.mp3" type="audio/mpeg">
+</audio>
+<audio class="audio-yes">
+    <source src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/62105/dino-win.mp3">
+</audio>
+<script>
+    const board = document.querySelector('.board');
+const clone = document.querySelector('.clone');
+const overlay = document.querySelector('.overlay');
+const reset = document.querySelector('.reset');
+const winMessage = document.querySelector('.win-message');
+const wowMessage = document.querySelector('.wow');
+const noMessage = document.querySelector('.no');
+const noAudio = document.querySelector('.audio-no');
+const yesAudio = document.querySelector('.audio-yes');
+
+    const tileData = {
+        1: [
+            ['6', '2', '7', '8'],
+            ['7', '8', '4', '3']
+        ],
+        2: [
+            ['19', '8', '17', '18', '88', '17'],
+            ['91', '21', '17', '71', '12', '19']
+        ],
+        3: [
+            ['6', '81', '18', '41', '14', '88', '41', '66'],
+            ['1', '41', '14', '17', '71', '66', '88', '77']
+        ],
+        4: [
+            ['91', '19', '21', '12', '41', '14', '15', '51'],
+            ['1', '41', '14', '17', '71', '66', '88', '77']
+        ],
+    };
+const state = {
+    selections: [],
+    boardLocked: false,
+    matches: 0,
+    level: 1,
+    maxLevel: 4,
+    playCount: {}
+};
+
+    function getTileDataForLevel(level) {
+        const levelData = tileData[level];
+        const playCount = state.playCount[level] || 0;
+        state.playCount[level] = playCount; // Ensure we stay on the same data set for both playthroughs
+        return levelData[state.playCount[level]];
+    }
+    function handleTileFlip(tile) {
+        tile.classList.add('flipped'); // Flip the tile
+
+        // Check if two tiles are flipped
+        const flippedTiles = document.querySelectorAll('.flipped');
+        if (flippedTiles.length === 2) {
+            // Disable clicking more tiles
+            disableTileClicking();
+
+            // Wait 0.3 seconds before checking for match
+            setTimeout(() => {
+                const [tile1, tile2] = flippedTiles;
+
+                if (tile1.dataset.value === tile2.dataset.value) {
+                    // Correct match
+                    showMessage('Correct');
+                    tile1.classList.add('matched');
+                    tile2.classList.add('matched');
+                } else {
+                    // Incorrect match
+                    showMessage('Incorrect');
+                    // Flip the tiles back
+                    tile1.classList.remove('flipped');
+                    tile2.classList.remove('flipped');
+                }
+
+                // Re-enable clicking tiles
+                enableTileClicking();
+
+                // Clear the flipped state
+                flippedTiles.forEach(tile => tile.classList.remove('flipped'));
+            }, 200); // 0.3 seconds delay
+        }
+    }
+
+    function resetGame() {
+        state.boardLocked = true;
+        state.selections = [];
+        state.matches = 0;
+
+        document.querySelectorAll('.cube').forEach(tile => {
+            tile.removeEventListener('click', handleTileClick);
+            tile.remove();
+        });
+
+        overlay.classList.add('hidden');
+        winMessage.classList.add('hidden');
+        wowMessage.classList.add('hidden');
+        noMessage.classList.add('hidden');
+        createBoard();
+    }
+    function createBoard() {
+        const levelTileCount = getTileCountForLevel(state.level);
+        const imagesForLevel = getTileDataForLevel(state.level);
+        const tiles = shuffleArray([...imagesForLevel.slice(0, levelTileCount), ...imagesForLevel.slice(0, levelTileCount)]);
+
+        tiles.forEach((tileData, i) => {
+            setTimeout(() => {
+                board.appendChild(buildTile(tileData, i));
+            }, i * 100);
+        });
+
+        // Calculate the flipping time: Start at 5 seconds (5000 ms) and increase by 2 seconds (2000 ms) per level
+        const flippingTime = 7000 + (state.level - 1) * 4000;
+        const countdownTime = flippingTime / 1000; // Convert to seconds
+
+        const timerElement = document.querySelector('.timer');
+        let timeRemaining = countdownTime;
+
+        // Update the timer every second
+        const timerInterval = setInterval(() => {
+            if (timeRemaining > 0) {
+                timeRemaining--;
+                timerElement.textContent = `Time: ${timeRemaining}s`;
+            } else {
+                clearInterval(timerInterval);
+            }
+        }, 1000);
+
+        setTimeout(() => {
+            document.querySelectorAll('.cube').forEach(tile => {
+                tile.classList.add('flipped');
+                tile.addEventListener('click', handleTileClick);
+            });
+
+            setTimeout(() => {
+                document.querySelectorAll('.cube').forEach(tile => {
+                    tile.classList.remove('flipped');
+                });
+                timerElement.textContent = ''; // Clear the timer
+                state.boardLocked = false;
+            }, flippingTime);
+        }, tiles.length * 100);
+    }
+
+
+    function buildTile(tileData, index) {
+        const tile = clone.cloneNode(true);
+        tile.classList.remove('clone');
+        tile.classList.add('cube');
+        tile.setAttribute('data-tile', tileData);
+
+        tile.querySelectorAll('.face').forEach((face, i) => {
+            if (i === 0) {
+                face.style.backgroundColor = 'wheat';
+            } else {
+                face.style.backgroundColor = 'dodgerblue';
+            }
+        });
+
+        return tile;
+    }
+
+    function playSound(audioElement) {
+        if (audioElement) {
+            audioElement.currentTime = 0;
+            audioElement.play();
+        }
+    }
+
+    function showMessage(messageElement, duration) {
+        // Delay the appearance of the message by 0.5 seconds
+        setTimeout(() => {
+            messageElement.classList.remove('hidden');
+
+            // Hide the message after the specified duration
+            setTimeout(() => {
+                messageElement.classList.add('hidden');
+            }, duration);
+
+        }, 800); // 0.5 seconds delay before showing the message
+    }
+
+
+    function handleTileClick() {
+        if (state.boardLocked) return;
+
+        const tile = this;
+        tile.classList.add('flipped');
+        state.selections.push(tile);
+
+        if (state.selections.length === 2) {
+            state.boardLocked = true;
+            const [firstTile, secondTile] = state.selections;
+
+            if (firstTile.getAttribute('data-tile') === secondTile.getAttribute('data-tile')) {
+                state.matches += 1;
+                playSound(yesAudio);
+                showMessage(wowMessage, 2500); // Show 'yes' message for 2s
+                state.selections = [];
+                state.boardLocked = false;
+
+                // Check if all pairs are matched
+                if (state.matches === getTileCountForLevel(state.level)) {
+                    setTimeout(() => {
+                        resetOrAdvanceLevel();
+                    }, 1500);
+                }
+            } else {
+                setTimeout(() => {
+                    firstTile.classList.remove('flipped');
+                    secondTile.classList.remove('flipped');
+                    state.selections = [];
+                    playSound(noAudio);
+                    showMessage(noMessage, 2000); // Show 'no' message for 2s
+                    state.boardLocked = false;
+                }, 1500);
+            }
+        }
+    }
+
+    function resetOrAdvanceLevel() {
+        if (!state.playCount[state.level]) {
+            state.playCount[state.level] = 1;
+        } else {
+            state.playCount[state.level]++;
+        }
+
+        if (state.playCount[state.level] >= 2) {
+            state.playCount[state.level] = 0; // Reset play count for this level
+            state.level++;
+            if (state.level > state.maxLevel) {
+                winMessage.classList.remove('hidden');
+                return;
+            }
+        }
+
+        resetGame();
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function getTileCountForLevel(level) {
+        return level * 2; // Number of pairs for each level
+    }
+
+    reset.addEventListener('click', () => {
+        if (state.boardLocked) return;
+        resetGame();
+    });
+
+    // Initialize the game
+    createBoard();
+
+
+</script>
+</body>
+</html>

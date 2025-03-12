@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Roboto:700');
+
+        html, body {
+            font-family: "roboto";
+            background-color: #232526;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            border: solid 5px rgba(255, 255, 255, 0.05);
+            transition: 0.5s;
+            box-sizing: border-box;
+        }
+        html:active, body:active {
+            transition: 0s;
+            border: solid 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .infos {
+            color: white;
+            position: absolute;
+            left: 40px;
+            top: 40px;
+            z-index: 100;
+        }
+        .infos h1 {
+            margin-top: 0;
+            margin-bottom: 0;
+            font-size: 40px;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+        .infos h3 {
+            font-weight: 500;
+            color: #FF5353;
+        }
+
+        .blocks .row {
+            display: flex;
+        }
+        .blocks .block {
+            animation: comeOut 1s;
+            width: 100px;
+            height: 100px;
+            border: solid 1px rgba(255, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition-duration: 0.6s;
+            transition-delay: 0.2s;
+            cursor: pointer;
+            margin: 12px;
+            color: white;
+            font-weight: 100;
+        }
+        .blocks .block:active,
+        .blocks .block.active {
+            background-color: red;
+            transition-duration: 0s;
+        }
+        .blocks .block1 {
+            box-shadow: 0px 0px 35px rgba(255, 83, 83, 0.2) inset, 0px 0px 30px rgba(255, 83, 83, 0.2);
+            background-color: transparent;
+            border: solid 1px black;
+            color: transparent;
+        }
+        .blocks .block1:hover {
+            background-color: rgba(255, 83, 83, 0.3);
+            box-shadow: 0px 0px 35px rgba(255, 83, 83, 0.2);
+        }
+        .blocks .block1:active,
+        .blocks .block1.active {
+            background-color: #FF5353;
+            box-shadow: 0px 0px 35px #FF5353;
+        }
+
+        .blocks .block2 {
+            box-shadow: 0px 0px 35px rgba(255, 196, 41, 0.2) inset, 0px 0px 30px rgba(255, 196, 41, 0.2);
+            background-color: transparent;
+            border: solid 1px black;
+            color: transparent;
+        }
+        .blocks .block2:hover {
+            background-color: rgba(255, 196, 41, 0.3);
+            box-shadow: 0px 0px 35px rgba(255, 196, 41, 0.2);
+        }
+        .blocks .block2:active,
+        .blocks .block2.active {
+            background-color: #FFC429;
+            box-shadow: 0px 0px 35px #FFC429;
+        }
+
+        .blocks .block3 {
+            box-shadow: 0px 0px 35px rgba(89, 128, 193, 0.2) inset, 0px 0px 30px rgba(89, 128, 193, 0.2);
+            background-color: transparent;
+            border: solid 1px black;
+            color: transparent;
+        }
+        .blocks .block3:hover {
+            background-color: rgba(89, 128, 193, 0.3);
+            box-shadow: 0px 0px 35px rgba(89, 128, 193, 0.2);
+        }
+        .blocks .block3:active,
+        .blocks .block3.active {
+            background-color: #5980C1;
+            box-shadow: 0px 0px 35px #5980C1;
+        }
+
+        .blocks .block4 {
+            box-shadow: 0px 0px 35px rgba(251, 233, 183, 0.2) inset, 0px 0px 30px rgba(251, 233, 183, 0.2);
+            background-color: transparent;
+            border: solid 1px black;
+            color: transparent;
+        }
+        .blocks .block4:hover {
+            background-color: rgba(251, 233, 183, 0.3);
+            box-shadow: 0px 0px 35px rgba(251, 233, 183, 0.2);
+        }
+        .blocks .block4:active,
+        .blocks .block4.active {
+            background-color: #FBE9B7;
+            box-shadow: 0px 0px 35px #FBE9B7;
+        }
+
+        .inputStatus {
+            margin-top: 10px;
+        }
+        .inputStatus .circle {
+            width: 6px;
+            height: 6px;
+            display: inline-block;
+            opacity: 0.3;
+            background-color: white;
+            border-radius: 100%;
+            margin: 5px;
+        }
+        .inputStatus .circle.correct,
+        .inputStatus .circle.wrong {
+            opacity: 1;
+        }
+        .inputStatus.wrong .circle {
+            background-color: #FF5353;
+        }
+        .inputStatus.correct .circle {
+            background-color: #5980C1;
+        }
+
+    </style>
+</head>
+<body>
+<div class="infos fadeIn animated">
+    <h2>Project 4.</h2>
+    <h1>Memory<br>Blocks</h1>
+    <h3 class="status">-</h3>
+</div>
+<div class="blocks fadeIn animated">
+    <div class="row">
+        <div class="block block1" onclick="game.userSendInput('1')">1</div>
+        <div class="block block2" onclick="game.userSendInput('2')">2</div>
+    </div>
+    <div class="row">
+        <div class="block block3" onclick="game.userSendInput('3')">3</div>
+        <div class="block block4" onclick="game.userSendInput('4')">4</div>
+    </div>
+    <div class="row">
+        <div class="inputStatus"></div>
+    </div>
+</div>
+<script>
+
+    //--------------------------------
+    //          Blocks Object
+    //--------------------------------
+    class Blocks {
+        constructor(blockAssign, setAssign) {
+            this.allOn = false;
+            this.blocks = blockAssign.map(d => ({
+                name: d.name,
+                el: document.querySelector(d.selector),
+                audio: this.getAudioObject(d.pitch)
+            }));
+            this.soundSets = setAssign.map(d => ({
+                name: d.name,
+                sets: d.sets.map(pitch => this.getAudioObject(pitch))
+            }));
+        }
+
+        flash(note) {
+            let block = this.blocks.find(d => d.name === note);
+            if (block) {
+                block.audio.currentTime = 0;
+                block.audio.play();
+                block.el.classList.add("active");
+                setTimeout(() => {
+                    if (!this.allOn) {
+                        block.el.classList.remove("active");
+                    }
+                }, 1000);
+            }
+        }
+
+        turnOnAll() {
+            this.allOn = true;
+            this.blocks.forEach(d => d.el.classList.add("active"));
+        }
+
+        turnOffAll() {
+            this.allOn = false;
+            this.blocks.forEach(d => d.el.classList.remove("active"));
+        }
+
+        getAudioObject(pitch) {
+            var audio =  new Audio("https://awiclass.monoame.com/pianosound/set/"+ pitch+".wav")
+            audio.setAttribute("preload", "auto");
+            return audio;
+        }
+
+        playSet(type) {
+            this.soundSets
+                .find(set => set.name === type).sets
+                .forEach(o => {
+                    o.currentTime = 0;
+                    o.play();
+                });
+        }
+    }
+
+    //--------------------------------
+    //          Game Object
+    //--------------------------------
+    class Game {
+        constructor() {
+            this.blocks = new Blocks(
+                [
+                    {selector: ".block1", name: "1", pitch: "1"},
+                    {selector: ".block2", name: "2", pitch: "2"},
+                    {selector: ".block3", name: "3", pitch: "3"},
+                    {selector: ".block4", name: "4", pitch: "4"}
+                ],
+                [
+                    {name: "correct", sets: [1, 3, 5, 8]},
+                    {name: "wrong", sets: [2, 4, 5.5, 7]}
+                ]
+            );
+
+            this.levels = [
+                "1234",
+                "12324",
+                "231234",
+                "41233412",
+                "41323134132",
+                "2342341231231423414232"
+            ];
+
+            this.fetchLevels();
+
+            this.currentLevel = 0;
+            this.playInterval = 400;
+            this.mode = "waiting";
+        }
+
+        fetchLevels() {
+            fetch("https://2017.awiclass.monoame.com/api/demo/memorygame/leveldata")
+                .then(response => response.json())
+                .then(data => {
+                    this.levels = data;
+                });
+        }
+
+        startLevel() {
+            this.showMessage("Level " + this.currentLevel);
+            this.startGame(this.levels[this.currentLevel]);
+        }
+
+        showMessage(message) {
+            console.log(message);
+            document.querySelector(".status").textContent = message;
+        }
+
+        startGame(answer) {
+            this.mode = "gamePlay";
+            this.answer = answer;
+            let notes = this.answer.split("");
+            this.showStatus("");
+
+            this.timer = setInterval(() => {
+                let char = notes.shift();
+                if (!notes.length) {
+                    clearInterval(this.timer);
+                    this.startUserInput();
+                }
+                this.playNote(char);
+            }, this.playInterval);
+        }
+
+        playNote(note) {
+            console.log(note);
+            this.blocks.flash(note);
+        }
+
+        startUserInput() {
+            this.userInput = "";
+            this.mode = "userInput";
+        }
+
+        userSendInput(inputChar) {
+            if (this.mode === "userInput") {
+                let tempString = this.userInput + inputChar;
+                this.playNote(inputChar);
+                this.showStatus(tempString);
+
+                if (this.answer.indexOf(tempString) === 0) {
+                    if (this.answer === tempString) {
+                        this.currentLevel += 1;
+                        this.mode = "waiting";
+                        setTimeout(() => {
+                            this.startLevel();
+                        }, 1000);
+                    }
+                    this.userInput += inputChar;
+                } else {
+                    this.currentLevel = 0;
+                    this.mode = "reset";
+                    setTimeout(() => {
+                        this.startLevel();
+                    }, 1000);
+                }
+            }
+        }
+
+        showStatus(tempString) {
+            const inputStatus = document.querySelector(".inputStatus");
+            inputStatus.innerHTML = "";
+
+            this.answer.split("").forEach((d, i) => {
+                const circle = document.createElement("div");
+                circle.className = 'circle';
+                if (i < tempString.length) {
+                    circle.classList.add("correct");
+                }
+                inputStatus.appendChild(circle);
+            });
+
+            if (tempString === this.answer) {
+                inputStatus.classList.add("correct");
+                this.showMessage("Correct!");
+                setTimeout(() => {
+                    this.blocks.turnOnAll();
+                    this.blocks.playSet("correct");
+                }, 1000);
+            } else {
+                inputStatus.classList.remove("correct");
+            }
+
+            if (tempString === "") {
+                this.blocks.turnOffAll();
+            }
+
+            if (this.answer.indexOf(tempString) !== 0) {
+                this.showMessage("Wrong...");
+                inputStatus.classList.add("wrong");
+                this.blocks.turnOnAll();
+                this.blocks.playSet("wrong");
+            } else {
+                inputStatus.classList.remove("wrong");
+            }
+        }
+    }
+
+    //--------------------
+    //     Start New Game
+    const game = new Game();
+    setTimeout(() => {
+        game.startLevel();
+    }, 1000);
+
+</script>
+</body>
+</html>

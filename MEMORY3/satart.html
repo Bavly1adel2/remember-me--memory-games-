@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Example</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #c54108;
+        }
+
+        .card-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            width: 200px;
+            text-align: center;
+            text-decoration: none; /* Remove underline */
+            color: inherit; /* Ensure text color is consistent */
+            transition: transform 0.3s; /* Smooth scaling effect */
+        }
+
+        .card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 15px;
+        }
+
+        .card-content h3 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .card-content p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .card:hover {
+            transform: scale(1.05); /* Slightly enlarge the card on hover */
+        }
+    </style>
+</head>
+<body>
+<div class="card-container">
+    <a href="index2.html" class="card">
+        <img src="alphanumeric-characters-28-characters.jpg" alt="Card Image">
+        <div class="card-content">
+            <h3>words</h3>
+        </div>
+    </a>
+    <a href="index3.html" class="card">
+        <img src="الارقام-العربية.jpg" alt="Card Image">
+        <div class="card-content">
+            <h3>numbres</h3>
+
+        </div>
+    </a>
+    <a href="index.html" class="card">
+        <img src="match-game-kids_23-2148774051.avif" alt="Card Image">
+        <div class="card-content">
+            <h3>matching</h3>
+
+        </div>
+    </a>
+</div>
+</body>
+</html>

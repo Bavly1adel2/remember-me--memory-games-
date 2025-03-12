@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Cards Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #c54108;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin: 10px;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .card h2 {
+            color: #333;
+        }
+        .card p {
+            color: #666;
+        }
+        .card img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .card a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .card a:hover {
+            background-color: #0056b3;
+        }
+        @media (min-width: 600px) {
+            .row {
+                flex-direction: row;
+            }
+            .card {
+                flex: 1 1 calc(50% - 40px);
+            }
+        }
+        @media (min-width: 900px) {
+            .card {
+                flex: 1 1 calc(33.33% - 40px);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="card">
+            <img src="png-transparent-memory-matching-game-matches-miscellaneous-game-memory-thumbnail.png" alt="Card Image 1">
+            <h2>Memory Game</h2>
+            <p>Matching game.</p>
+            <a href="MEMORY3/satart.html">Click here</a>
+        </div>
+
+        <div class="card">
+            <img src="png-transparent-multicolored-numbers-chart-illustration-numbers-game-mathematics-numbers-game-prime-number-numbers-game-text-logo-thumbnail.png" alt="Card Image 2">
+            <h2>Numbers</h2>
+            <p>Remember the numbers</p>
+            <a href="numbers/index.html">Click here</a>
+        </div>
+
+        <div class="card">
+            <img src="png-transparent-simon-game-hd-logo.png" alt="Card Image 3">
+            <h2>Simon</h2>
+            <p>Remember the color</p>
+            <a href="simon/index.html">Click here</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="card">
+            <img src="لقطة%20الشاشة%202024-07-10%20203552.png" alt="Card Image 4">
+            <h2>Images Remember</h2>
+            <p>Remember the images</p>
+            <a href="img%20remember/index.html">Click here</a>
+        </div>
+
+        <div class="card">
+            <img src="capsule_616x353.jpg" alt="Card Image 5">
+            <h2>Arrows</h2>
+            <p>Choose the right arrow</p>
+            <a href="arrows/index.html">Click here</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

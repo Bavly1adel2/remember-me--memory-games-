@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Memory Game for Kids</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            height: 100vh;
+            width: 100vw;
+            background-color: #c54108;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Comic Sans MS', cursive, sans-serif; /* Fun font */
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        .board {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            padding: 10px;
+            border: 5px solid #ff69b4;
+            background-color: #c54108;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* Fixed number of columns */
+            gap: 10px;
+            justify-items: center;
+            align-items: center;
+        }
+
+        .square {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3vw; /* Responsive font size */
+            border: 3px solid #ffd700; /* Gold border */
+            color: black; /* Black text color */
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s;
+            border-radius: 15px; /* Rounded corners */
+            background: #add8e6; /* Light blue background */
+            width: 150px; /* Fixed width */
+            height: 150px; /* Fixed height */
+        }
+
+        .square.correct {
+            background: #32cd32; /* Green background */
+            color: #ffffff; /* White text */
+        }
+
+        .square.incorrect {
+            background: #ff6347; /* Tomato background */
+            color: #ffffff; /* White text */
+        }
+
+        .info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 2em;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .timer {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 2em;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 20px;
+            display: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+<div class="board">
+    <div class="info">
+        Score: <span id="score">0</span>
+    </div>
+   <!-- <div class="timer" id="timer">Time: 60</div> -->
+    <div class="grid" id="grid"></div>
+    <div class="message" id="message"></div>
+</div>
+<script>
+    const board = document.querySelector(".board");
+    const grid = document.getElementById("grid");
+    const message = document.getElementById("message");
+    const timerElement = document.getElementById('timer');
+    const scoreElement = document.getElementById('score');
+    const wrong = new Audio("wrong-buzzer-6268.mp3");
+    const correct = new Audio("the-correct-answer-33-183620.mp3");
+    let squareCount = 2; // Initial number of squares for Level 1
+    let startNumber = 1; // Starting number for the sequence
+    let timeLeft = 10000; // Initial time for the timer (in seconds)
+    let score = 0;
+    let timerInterval;
+    let displayTime = 5000; // Initial display time set to 5000ms (5 seconds)
+    let currentLevel = 1; // Track the current level
+
+    const showMessage = (text, color) => {
+        message.textContent = text;
+        message.style.color = color;
+        message.style.display = 'block';
+        setTimeout(() => {
+            message.style.display = 'none';
+        }, 1000); // Display the message for 1 second
+    };
+
+    const startTimer = () => {
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerElement.textContent = `Time: ${timeLeft}s`;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert('Time is up! Game Over!');
+                resetGame(); // Reset the game if time is up
+            }
+        }, 1000); // Decrease time by 1 second each interval
+    };
+
+    const resetTimer = () => {
+        clearInterval(timerInterval);
+        timeLeft = 60; // Reset timer to 60 seconds for each level
+        timerElement.textContent = `Time: ${timeLeft}s`;
+        startTimer(); // Start the timer again
+    };
+
+    const resetGame = () => {
+        squareCount = 2; // Reset to 2 squares for the first level
+        startNumber = 1; // Reset starting number
+        currentLevel = 1; // Start from Level 1
+        score = 0;
+        scoreElement.textContent = `Score: ${score}`;
+        displayTime = 5000; // Reset display time to 5 seconds
+        resetTimer();
+        createSquare();
+    };
+
+    const updateScore = (points) => {
+        score += points;
+        scoreElement.textContent = `Score: ${score}`;
+    };
+
+    const createSquare = () => {
+        grid.innerHTML = "";
+
+        const numbers = Array.from({ length: squareCount }, (_, i) => startNumber + i); // Generate sequence for the current level
+        const shuffledNumbers = numbers.sort(() => Math.random() - 0.5); // Shuffle the numbers
+
+        let currentIndex = startNumber; // Track the expected smallest number in the sequence
+
+        // Create the squares on the grid
+        for (let i = 0; i < squareCount; i++) {
+            const square = document.createElement("div");
+            square.classList.add("square");
+            square.textContent = shuffledNumbers[i]; // Assign shuffled number
+            grid.appendChild(square);
+        }
+
+        const squaresElements = grid.querySelectorAll(".square");
+
+        // Disable pointer events before flipping
+        squaresElements.forEach(item => {
+            item.style.pointerEvents = "none";
+        });
+
+        // Display the numbers for the current level's display time
+        setTimeout(() => {
+            squaresElements.forEach(item => {
+                item.style.color = "transparent";
+                item.style.pointerEvents = "all"; // Re-enable pointer events after flipping
+            });
+        }, displayTime); // Display time will start at 5 seconds and increase by 2 seconds each level
+
+        // Add click event listeners to each square
+        squaresElements.forEach(item => {
+            item.addEventListener("click", () => {
+                const clickedNumber = parseInt(item.textContent);
+
+                // Show the number when clicked
+                item.style.color = "black";
+
+                // Give a delay before checking correctness so that the player can see the number
+                setTimeout(() => {
+                    if (clickedNumber === currentIndex) {
+                        correct.play();
+                        correct.currentTime = 0;
+                        item.classList.add("correct");
+                        showMessage("WoW", "green");
+
+                        updateScore(10); // Increase score for each correct click
+
+                        if (currentIndex === startNumber + squareCount - 1) { // Check if the player has selected all numbers in order
+                            updateScore(50); // Bonus points for completing the sequence
+                            currentLevel++; // Move to the next level
+                            squareCount = currentLevel + 1; // Increase the square count to match the level
+                            startNumber = 1; // Reset starting number for the new level
+                            displayTime += 2000; // Increase display time by 2 seconds for each level
+                            squaresElements.forEach(square => {
+                                square.style.pointerEvents = "none"; // Disable pointer events during the transition
+                            });
+                            setTimeout(() => {
+                                createSquare(); // Generate the next level with more squares
+                            }, 2000); // Wait 2 seconds before generating new squares
+                        } else {
+                            currentIndex++; // Move to the next number in the sequence
+                        }
+                    } else {
+                        wrong.play();
+                        wrong.currentTime = 0;
+                        item.classList.add("incorrect");
+                        showMessage("NO", "red");
+                        squaresElements.forEach(square => {
+                            square.style.pointerEvents = "none"; // Disable clicking after a wrong choice
+                        });
+                        setTimeout(() => {
+                            createSquare(); // Restart the round
+                        }, 1000); // Restart after 1 second
+                    }
+                }, 500); // Small delay to allow the number to be visible for a short time
+            });
+        });
+    };
+
+    // Start the game with the timer and square creation
+    startTimer();
+    createSquare();
+
+</script>
+</body>
+</html>
